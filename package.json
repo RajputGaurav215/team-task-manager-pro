@@ -1,0 +1,25 @@
+{
+  "name": "team-task-manager-ultra-pro",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Ultra professional full-stack Team Task Manager with RBAC, Kanban UI, comments, activity logs, REST API, PostgreSQL, Prisma and Railway deployment.",
+  "scripts": {
+    "postinstall": "npm install --prefix server && npm install --prefix client",
+    "dev": "concurrently \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "build": "npm --prefix server run prisma:generate && npm --prefix client run build",
+    "start": "npm --prefix server run start:prod",
+    "db:migrate": "npm --prefix server run prisma:migrate",
+    "db:deploy": "npm --prefix server run prisma:deploy",
+    "seed": "npm --prefix server run seed",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "prisma:generate": "npm --prefix server run prisma:generate",
+    "fix:local": "npm run db:up && npm run db:migrate && npm run prisma:generate && npm run seed"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.18.0"
+  }
+}
