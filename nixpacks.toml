@@ -5,9 +5,8 @@ NPM_CONFIG_AUDIT = "false"
 
 [phases.install]
 cmds = [
-  "npm install --no-audit --no-fund",
-  "npm install --prefix server --no-audit --no-fund",
-  "npm install --prefix client --no-audit --no-fund"
+  "npm install --prefix server --include=dev --no-audit --no-fund",
+  "npm install --prefix client --include=dev --no-audit --no-fund"
 ]
 
 [phases.build]
