@@ -19,7 +19,6 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
 const clientOrigin = process.env.CLIENT_URL || "http://localhost:5173";
-const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`TeamFlow Pro server running on port ${PORT}`);
