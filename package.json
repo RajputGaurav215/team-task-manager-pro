@@ -4,7 +4,6 @@
   "private": true,
   "description": "Ultra professional full-stack Team Task Manager with RBAC, Kanban UI, comments, activity logs, REST API, PostgreSQL, Prisma and Railway deployment.",
   "scripts": {
-    "postinstall": "npm install --prefix server && npm install --prefix client",
     "dev": "concurrently \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
     "build": "npm --prefix server run prisma:generate && npm --prefix client run build",
     "start": "npm --prefix server run start:prod",
