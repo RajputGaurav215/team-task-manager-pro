@@ -1,31 +1,46 @@
 {
-  "name": "team-task-manager-ultra-pro-server",
+  "name": "team-task-manager-pro-server",
   "version": "1.0.0",
+  "private": true,
   "type": "module",
+  "description": "Express API server for Team Task Manager Pro with Prisma, PostgreSQL, JWT authentication and RBAC.",
   "main": "src/index.js",
   "scripts": {
-    "dev": "prisma generate && nodemon src/index.js",
-    "start": "prisma generate && node src/index.js",
-    "start:prod": "npx prisma migrate deploy && npx prisma generate && node src/index.js",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "prisma:deploy": "prisma migrate deploy",
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "prisma:migrate": "prisma migrate dev --schema prisma/schema.prisma",
+    "prisma:generate": "prisma generate --schema prisma/schema.prisma",
+    "prisma:deploy": "prisma migrate deploy --schema prisma/schema.prisma",
     "seed": "node prisma/seed.js"
   },
+  "keywords": [
+    "express",
+    "prisma",
+    "postgresql",
+    "jwt",
+    "rbac",
+    "team-task-manager"
+  ],
+  "author": "Gaurav Kumar",
+  "license": "MIT",
   "dependencies": {
     "@prisma/client": "^5.22.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.21.1",
-    "express-rate-limit": "^7.4.1",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
-    "team-task-manager-ultra-pro": "file:..",
-    "zod": "^3.23.8"
+    "morgan": "^1.10.0",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.7",
+    "nodemon": "^3.1.9",
     "prisma": "^5.22.0"
+  },
+  "engines": {
+    "node": "20.x",
+    "npm": "10.x"
   }
 }

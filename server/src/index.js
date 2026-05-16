@@ -6,6 +6,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+
 import authRoutes from "./routes/auth.routes.js";
 import projectRoutes from "./routes/project.routes.js";
 import taskRoutes from "./routes/task.routes.js";
@@ -16,13 +17,10 @@ dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 const clientOrigin = process.env.CLIENT_URL || "http://localhost:5173";
-
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`TeamFlow Pro server running on port ${PORT}`);
-});
 
 app.set("trust proxy", 1);
 app.disable("x-powered-by");
@@ -61,6 +59,7 @@ app.use(
       ) {
         return callback(null, true);
       }
+
       return callback(null, true);
     },
     credentials: true,
@@ -98,16 +97,20 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
 const clientDistPath = path.join(__dirname, "../../client/dist");
+
 app.use(express.static(clientDistPath));
 
 app.get("*", (req, res, next) => {
-  if (req.originalUrl.startsWith("/api")) return next();
+  if (req.originalUrl.startsWith("/api")) {
+    return next();
+  }
+
   res.sendFile(path.join(clientDistPath, "index.html"));
 });
 
 app.use(notFound);
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`TeamFlow Pro server running on port ${PORT}`);
 });
