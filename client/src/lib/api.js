@@ -1,4 +1,10 @@
-const API_BASE = "/api";
+const isLocalhost =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1";
+
+const API_BASE = isLocalhost
+  ? import.meta.env.VITE_API_URL || "http://localhost:5000/api"
+  : "/api";
 
 export function getToken() {
   return localStorage.getItem("teamflow_token");
@@ -53,10 +59,6 @@ export async function api(path, options = {}) {
   return data;
 }
 
-/* =========================
-   AUTH API
-========================= */
-
 export const authAPI = {
   signup: (data) =>
     api("/auth/signup", {
@@ -94,10 +96,6 @@ export const authAPI = {
       },
     }),
 };
-
-/* =========================
-   PROJECT API
-========================= */
 
 export const projectAPI = {
   getAll: () => api("/projects"),
@@ -141,10 +139,6 @@ export const projectAPI = {
     }),
 };
 
-/* =========================
-   TASK API
-========================= */
-
 export const taskAPI = {
   getAll: (projectId) => {
     const query = projectId ? `?projectId=${projectId}` : "";
@@ -179,17 +173,9 @@ export const taskAPI = {
     }),
 };
 
-/* =========================
-   DASHBOARD API
-========================= */
-
 export const dashboardAPI = {
   getStats: () => api("/dashboard"),
 };
-
-/* =========================
-   HEALTH API
-========================= */
 
 export const healthAPI = {
   check: () => api("/health"),
