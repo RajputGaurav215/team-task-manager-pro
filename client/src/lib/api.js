@@ -1,35 +1,196 @@
-const API_BASE = import.meta.env.VITE_API_URL || '/api';
+const API_BASE = import.meta.env.VITE_API_URL || "/api";
 
 export function getToken() {
-  return localStorage.getItem('teamflow_token');
+  return localStorage.getItem("teamflow_token");
 }
 
 export function setToken(token) {
-  localStorage.setItem('teamflow_token', token);
+  localStorage.setItem("teamflow_token", token);
 }
 
 export function clearToken() {
-  localStorage.removeItem('teamflow_token');
+  localStorage.removeItem("teamflow_token");
 }
 
 export async function api(path, options = {}) {
   const headers = new Headers(options.headers || {});
-  headers.set('Content-Type', 'application/json');
-
   const token = getToken();
-  if (token) headers.set('Authorization', `Bearer ${token}`);
+
+  headers.set("Content-Type", "application/json");
+
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
 
   const response = await fetch(`${API_BASE}${path}`, {
     ...options,
     headers,
-    body: options.body ? JSON.stringify(options.body) : undefined
+    body: options.body ? JSON.stringify(options.body) : undefined,
   });
 
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    const message = data?.message || 'Request failed.';
-    const details = data?.errors?.map((err) => `${err.field}: ${err.message}`).join(', ');
-    throw new Error(details || message);
+  let data = {};
+
+  try {
+    data = await response.json();
+  } catch {
+    data = {};
   }
+
+  if (!response.ok) {
+    const message =
+      data?.message ||
+      data?.error ||
+      data?.details ||
+      "Request failed. Please try again.";
+
+    throw new Error(
+      Array.isArray(message)
+        ? message.map((item) => item.message || item).join(", ")
+        : message,
+    );
+  }
+
   return data;
 }
+
+/* =========================
+   AUTH API
+========================= */
+
+export const authAPI = {
+  signup: (data) =>
+    api("/auth/signup", {
+      method: "POST",
+      body: {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      },
+    }),
+
+  login: (data) =>
+    api("/auth/login", {
+      method: "POST",
+      body: {
+        email: data.email,
+        password: data.password,
+      },
+    }),
+
+  forgotPassword: (data) =>
+    api("/auth/forgot-password", {
+      method: "POST",
+      body: {
+        email: data.email,
+      },
+    }),
+
+  resetPassword: (data) =>
+    api("/auth/reset-password", {
+      method: "POST",
+      body: {
+        token: data.token,
+        password: data.password,
+      },
+    }),
+};
+
+/* =========================
+   PROJECT API
+========================= */
+
+export const projectAPI = {
+  getAll: () => api("/projects"),
+
+  getById: (projectId) => api(`/projects/${projectId}`),
+
+  create: (data) =>
+    api("/projects", {
+      method: "POST",
+      body: data,
+    }),
+
+  update: (projectId, data) =>
+    api(`/projects/${projectId}`, {
+      method: "PUT",
+      body: data,
+    }),
+
+  delete: (projectId) =>
+    api(`/projects/${projectId}`, {
+      method: "DELETE",
+    }),
+
+  join: (inviteCode) =>
+    api("/projects/join", {
+      method: "POST",
+      body: {
+        inviteCode,
+      },
+    }),
+
+  addMember: (projectId, data) =>
+    api(`/projects/${projectId}/members`, {
+      method: "POST",
+      body: data,
+    }),
+
+  removeMember: (projectId, userId) =>
+    api(`/projects/${projectId}/members/${userId}`, {
+      method: "DELETE",
+    }),
+};
+
+/* =========================
+   TASK API
+========================= */
+
+export const taskAPI = {
+  getAll: (projectId) => {
+    const query = projectId ? `?projectId=${projectId}` : "";
+    return api(`/tasks${query}`);
+  },
+
+  getById: (taskId) => api(`/tasks/${taskId}`),
+
+  create: (data) =>
+    api("/tasks", {
+      method: "POST",
+      body: data,
+    }),
+
+  update: (taskId, data) =>
+    api(`/tasks/${taskId}`, {
+      method: "PUT",
+      body: data,
+    }),
+
+  delete: (taskId) =>
+    api(`/tasks/${taskId}`, {
+      method: "DELETE",
+    }),
+
+  updateStatus: (taskId, status) =>
+    api(`/tasks/${taskId}`, {
+      method: "PUT",
+      body: {
+        status,
+      },
+    }),
+};
+
+/* =========================
+   DASHBOARD API
+========================= */
+
+export const dashboardAPI = {
+  getStats: () => api("/dashboard"),
+};
+
+/* =========================
+   HEALTH API
+========================= */
+
+export const healthAPI = {
+  check: () => api("/health"),
+};
