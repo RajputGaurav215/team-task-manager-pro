@@ -4,7 +4,11 @@ const isLocalhost =
 
 const API_BASE = isLocalhost
   ? import.meta.env.VITE_API_URL || "http://localhost:5000/api"
-  : "/api";
+  : `${window.location.origin}/api`;
+
+function normalizePath(path) {
+  return path.startsWith("/") ? path : `/${path}`;
+}
 
 export function getToken() {
   return localStorage.getItem("teamflow_token");
@@ -19,6 +23,8 @@ export function clearToken() {
 }
 
 export async function api(path, options = {}) {
+  const url = `${API_BASE}${normalizePath(path)}`;
+
   const headers = new Headers(options.headers || {});
   const token = getToken();
 
@@ -28,11 +34,24 @@ export async function api(path, options = {}) {
     headers.set("Authorization", `Bearer ${token}`);
   }
 
-  const response = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers,
-    body: options.body ? JSON.stringify(options.body) : undefined,
-  });
+  let response;
+
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers,
+      body: options.body ? JSON.stringify(options.body) : undefined,
+    });
+  } catch (error) {
+    console.error("API Network Error:", {
+      url,
+      error,
+    });
+
+    throw new Error(
+      `Failed to connect to server. Please check API URL: ${url}`
+    );
+  }
 
   let data = {};
 
@@ -52,12 +71,16 @@ export async function api(path, options = {}) {
     throw new Error(
       Array.isArray(message)
         ? message.map((item) => item.message || item).join(", ")
-        : message,
+        : message
     );
   }
 
   return data;
 }
+
+/* =========================
+   AUTH API
+========================= */
 
 export const authAPI = {
   signup: (data) =>
@@ -96,6 +119,10 @@ export const authAPI = {
       },
     }),
 };
+
+/* =========================
+   PROJECT API
+========================= */
 
 export const projectAPI = {
   getAll: () => api("/projects"),
@@ -139,6 +166,10 @@ export const projectAPI = {
     }),
 };
 
+/* =========================
+   TASK API
+========================= */
+
 export const taskAPI = {
   getAll: (projectId) => {
     const query = projectId ? `?projectId=${projectId}` : "";
@@ -173,9 +204,17 @@ export const taskAPI = {
     }),
 };
 
+/* =========================
+   DASHBOARD API
+========================= */
+
 export const dashboardAPI = {
   getStats: () => api("/dashboard"),
 };
+
+/* =========================
+   HEALTH API
+========================= */
 
 export const healthAPI = {
   check: () => api("/health"),
