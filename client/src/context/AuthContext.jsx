@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { api, clearToken, setToken } from '../lib/api.js';
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { api, clearToken, getToken, setToken } from "../lib/api.js";
 
 const AuthContext = createContext(null);
 
@@ -9,28 +9,60 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     async function loadUser() {
+      const token = getToken();
+
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
       try {
-        const data = await api('/auth/me');
+        const data = await api("/auth/me");
         setUser(data.user);
       } catch {
         clearToken();
+        setUser(null);
       } finally {
         setLoading(false);
       }
     }
+
     loadUser();
   }, []);
 
   async function login(email, password) {
-    const data = await api('/auth/login', { method: 'POST', body: { email, password } });
-    setToken(data.token);
+    const data = await api("/auth/login", {
+      method: "POST",
+      body: {
+        email,
+        password,
+      },
+    });
+
+    if (data.token) {
+      setToken(data.token);
+    }
+
     setUser(data.user);
+    return data;
   }
 
   async function signup(name, email, password) {
-    const data = await api('/auth/signup', { method: 'POST', body: { name, email, password } });
-    setToken(data.token);
+    const data = await api("/auth/signup", {
+      method: "POST",
+      body: {
+        name,
+        email,
+        password,
+      },
+    });
+
+    if (data.token) {
+      setToken(data.token);
+    }
+
     setUser(data.user);
+    return data;
   }
 
   function logout() {
@@ -38,13 +70,26 @@ export function AuthProvider({ children }) {
     setUser(null);
   }
 
-  const value = useMemo(() => ({ user, loading, login, signup, logout }), [user, loading]);
+  const value = useMemo(
+    () => ({
+      user,
+      loading,
+      login,
+      signup,
+      logout,
+    }),
+    [user, loading],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used inside AuthProvider');
+
+  if (!context) {
+    throw new Error("useAuth must be used inside AuthProvider");
+  }
+
   return context;
 }
